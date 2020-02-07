@@ -1,12 +1,14 @@
 package edu.wpi.first.wpilibj.defaultCode;
 
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.Victor;
+import java.lang.Math;
 
 //Last change: code cleaned up
 
@@ -38,6 +40,7 @@ public class DefaultRobot extends IterativeRobot {
     static final int portRightBack = 2;
     static final int portLeftFront = 3;
     static final int portLeftBack = 4;
+    static final double threshold = 0.003;
 
     static final boolean debug = true; // Why always true???
 
@@ -62,8 +65,8 @@ public class DefaultRobot extends IterativeRobot {
         System.out.println("BuiltinDefaultCode Constructor Started\n");
 
         // Robot DRIVE init Method
-        // RobotDrive​(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-        m_robotDrive = new RobotDrive(portLeftFront, portLeftBack, portRightFront, portRightBack);
+        // RobotDrive?(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
+        //m_robotDrive = new RobotDrive(portLeftFront, portLeftBack, portRightFront, portRightBack);
         
         // Create a robot using standard right/left robot drive on PWMS 1, 2, 3, and #4
         rightFront = new Victor(portRightFront);
@@ -103,8 +106,8 @@ public class DefaultRobot extends IterativeRobot {
         // Actions which would be performed once (and only once) upon initialization of the
         // robot would be put here.
         // Set Inverted Motors, so the thing doesn't explode
-        m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-        m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        //m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        //m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         System.out.println("RobotInit() completed.\n");
     }
 
@@ -178,23 +181,28 @@ public class DefaultRobot extends IterativeRobot {
 
         // put Driver Station-dependent code here
         if (debug){
-            m_robotDrive.setSafetyEnabled(false);
+            //m_robotDrive.setSafetyEnabled(false);
             System.out.print("Joy stick 5:");
             System.out.println(m_xboxController.getRawAxis(5));
             System.out.print("Joy stick 2:");
             System.out.println(m_xboxController.getRawAxis(2));
             //-------------------------------------------------
-            leftFront.set(m_xboxController.getRawAxis(2));
-            leftBack.set(-m_xboxController.getRawAxis(2));
-            rightFront.set(m_xboxController.getRawAxis(5));
-            rightBack.set(-m_xboxController.getRawAxis(5));
+            if (Math.abs(m_xboxController.getRawAxis(5)) > threshold){
+                rightFront.set(-m_xboxController.getRawAxis(5));
+            }
+            if (Math.abs(m_xboxController.getRawAxis(2)) > threshold){
+                rightBack.set(m_xboxController.getRawAxis(2));
+            }
         } else {
+            /* This doesn't work
             m_robotDrive.setSafetyEnabled(false);
             System.out.print("Joy stick 5:");
             System.out.println(m_xboxController.getRawAxis(5));
             System.out.print("Joy stick 2:");
             System.out.println(m_xboxController.getRawAxis(2));
             m_robotDrive.tankDrive(m_xboxController.getRawAxis(2), m_xboxController.getRawAxis(5));
+            */
+            System.out.println("WHy");
         }
         if (m_driveMode != TANK_DRIVE) {
             // if newly entered tank drive, print out a message
