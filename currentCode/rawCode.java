@@ -4,7 +4,6 @@ package edu.wpi.first.wpilibj.defaultCode;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.Victor;
@@ -28,10 +27,6 @@ public class DefaultRobot extends IterativeRobot {
     Joystick m_leftStick;			// joystick 2 (tank left stick)
     Joystick m_xboxController;
 
-    // Declare variables for each of the eight victors outputs
-    static final int NUM_VICTORS = 4;
-    Victor[] m_victors = new Victor[NUM_SOLENOIDS];
-
     // drive mode selection
     static final int UNINITIALIZED_DRIVE = 0;
     static final int ARCADE_DRIVE = 1;
@@ -39,12 +34,12 @@ public class DefaultRobot extends IterativeRobot {
     int m_driveMode;
 
     //wiring:
-    static final int portRightFront=1;
-    static final int portRightBack=2;
-    static final int portLeftFront=3;
-    static final int portLeftBack=4;
+    static final int portRightFront = 1;
+    static final int portRightBack = 2;
+    static final int portLeftFront = 3;
+    static final int portLeftBack = 4;
 
-    static final boolean debug=true;
+    static final boolean debug = true; // Why always true???
 
     // Local variables to count the number of periodic loops performed
     int m_autoPeriodicLoops;
@@ -66,6 +61,10 @@ public class DefaultRobot extends IterativeRobot {
     public DefaultRobot() {
         System.out.println("BuiltinDefaultCode Constructor Started\n");
 
+        // Robot DRIVE init Method
+        // RobotDrive​(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
+        m_robotDrive = new RobotDrive(portLeftFront, portLeftBack, portRightFront, portRightBack);
+        
         // Create a robot using standard right/left robot drive on PWMS 1, 2, 3, and #4
         rightFront = new Victor(portRightFront);
         rightBack = new Victor(portRightBack);
@@ -103,7 +102,9 @@ public class DefaultRobot extends IterativeRobot {
     public void robotInit() {
         // Actions which would be performed once (and only once) upon initialization of the
         // robot would be put here.
-
+        // Set Inverted Motors, so the thing doesn't explode
+        m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        m_robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         System.out.println("RobotInit() completed.\n");
     }
 
@@ -176,18 +177,25 @@ public class DefaultRobot extends IterativeRobot {
         m_dsPacketsReceivedInCurrentSecond++;					// increment DS packets received
 
         // put Driver Station-dependent code here
-        // use tank drive
-        // m_robotDrive.tankDrive(m_leftStick, m_rightStick);
-        m_robotDrive.setSafetyEnabled(false);
-        System.out.print("Joy stick 5:");
-        System.out.println(m_xboxController.getRawAxis(5));
-        System.out.print("Joy stick 2:");
-        System.out.println(m_xboxController.getRawAxis(2));
-        //-------------------------------------------------
-        leftFront.set(m_xboxController.getRawAxis(2));
-        leftBack.set(-m_xboxController.getRawAxis(2));
-        rightFront.set(m_xboxController.getRawAxis(5));
-        rightBack.set(-m_xboxController.getRawAxis(5));
+        if (debug){
+            m_robotDrive.setSafetyEnabled(false);
+            System.out.print("Joy stick 5:");
+            System.out.println(m_xboxController.getRawAxis(5));
+            System.out.print("Joy stick 2:");
+            System.out.println(m_xboxController.getRawAxis(2));
+            //-------------------------------------------------
+            leftFront.set(m_xboxController.getRawAxis(2));
+            leftBack.set(-m_xboxController.getRawAxis(2));
+            rightFront.set(m_xboxController.getRawAxis(5));
+            rightBack.set(-m_xboxController.getRawAxis(5));
+        } else {
+            m_robotDrive.setSafetyEnabled(false);
+            System.out.print("Joy stick 5:");
+            System.out.println(m_xboxController.getRawAxis(5));
+            System.out.print("Joy stick 2:");
+            System.out.println(m_xboxController.getRawAxis(2));
+            m_robotDrive.tankDrive(m_xboxController.getRawAxis(2), m_xboxController.getRawAxis(5));
+        }
         if (m_driveMode != TANK_DRIVE) {
             // if newly entered tank drive, print out a message
             System.out.println("Tank Drive\n");
